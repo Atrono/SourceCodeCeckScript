@@ -1,64 +1,107 @@
 #!/bin/bash
 
-# Temporäre Dateien
-path=/tmp
-err=$path/err.tmp
-html=$path/html.tmp
-css=$path/css.tmp
-php=$path/php.tmp
-js=$path/js.tmp
-link=$path/link.tmp
+# Created by Damian Fürbach on 26.03.2014.
+# Copyright (c) 2014 Damian Fürbach. All rights reserved.
 
+# path to Temporary Data
+tmpPath=/tmp
+
+# Temporary Data
+err=$tmpPath/err.tmp
+html=$tmpPath/html.tmp
+css=$tmpPath/css.tmp
+php=$tmpPath/php.tmp
+js=$tmpPath/js.tmp
+link=$tmpPath/link.tmp
+tmp=$tmpPath/tmp.tmp
+
+# Dir variables
+project=${PWD##*/}
+
+# Config variables
+jsConfig=.ci-test/jshint.conf
+testIgnor=.ci-test/testignore
+
+# vHost variables
 fqdn=`hostname --fqdn`
-dir=`pwd | cut -c34-`
-url=$fqdn$dir
+cname=`cut -c1-9 .git/ORIG_HEAD`
+dir=/var/www/$project/$cname
 
-# Variablen
-exitStatus=0	#Speichert exit [0|1|2]
+# Status variables
+exitStatus=0
 
-
+# Ceck if parameter entered
 if [ $1 = "" ];then
-	"Es wurde kein Parameter eingegeben {-help|-html|-css|-php|-js|-link}"
+	"There was no parameter entered {--help|-html|-css|-php|-js|-link}"
 	exit 1
 fi
 
+# Copy Commit to /var/www/project-XX/commit
+if [ -s $dir ];then
+	rm -R $dir/*
+	mv * $dir
+else
+	mkdir -p $dir
+	mv * $dir
+fi
+
+# crate vHost
+echo "
+			****************************
+			***     vHost script     ***
+			****************************"
+
+if [ -s /etc/apache2/sites-available/$cname.$fqdn.conf ];then
+	echo "vhost für $cname.$fqdn, existiert bereits!"
+else
+	echo "vhost für $cname.$fqdn, existiert noch nicht."
+	mkdir /var/log/$cname.$fqdn/
+echo "#### $cname.$fqdn
+<VirtualHost *:80>
+	ServerName $fqdn
+	ServerAlias $cname.$fqdn
+	DocumentRoot $dir
+	<Directory $dir>
+		Options Indexes FollowSymLinks MultiViews
+		AllowOverride All
+		Order allow,deny
+		allow from all
+	</Directory>
+</VirtualHost>" > /etc/apache2/sites-available/$cname.$fqdn.conf
+	sudo ln -s /etc/apache2/sites-available/$cname.$fqdn.conf /etc/apache2/sites-enabled/$cname.$fqdn.conf
+	echo "Testing configuration"
+	service apache2 configtest
+	service apache2 restart
+fi
+
+
+# change dir
+cd $dir
+
+# Commands
 while test $# -gt 0; do
         case "$1" in
-                -h|--help)
+        	-h|--help)
 			shift
-                        echo "
+            echo "
 			****************************
 			***         Hilfe        ***
 			****************************"
-			echo "Author: Atrono"
-			echo "Last change: 21.02.2014"
-			echo 
-			echo "Das script hat die Aufgabe anhand der Parameter, die datein in dem jeweils befindlichen Ordner zu Prüfen."
-			echo "Es ermöglicht die Überprüfung von HTML, XHTML, XML, CSS, PHP, JavaScript und Links(Linkchecker)."
-			echo 
-			echo "Befehlsübersicht:"
-			echo 
-			echo "	-h | --help	Hilfe"
-			echo 
-			echo "	-html		Mithilfe von dem Kommandozeilen-Programm Tidy wird hier die Syntax von HTML/XHTML/XML überprüft."
-			echo 
-			echo "	-css		Blablabla"
+			echo "Author: Damian Fürbach"
 			echo
-			echo "	-php		bla"
-			echo
-			echo "	-js		joooo"
-			echo
-			echo "	-link		gut!"
-			echo 				
+			echo "Here you get Help..."
+			echo		
 			exit 0
 		;;
-                -html)
+        	-html)
 			shift
 			echo "
 			****************************
 			***     HTML-Validator   ***
 			****************************"
 			find -name *.HTML -or -name *.XHTML -or -name *.XML -or -name *.html -or -name *.xhtml -or -name *.xml > $html
+			grep -vxf $testIgnor $html > $tmp
+			mv $tmp $html
 
 			if [ -s $html ];then
         	                htmlFiles=`wc -l < $html`
@@ -66,120 +109,124 @@ while test $# -gt 0; do
 
 				for i in `cat $html`; do
 					echo "---"
-					echo "Teste $i"
+					echo "try $i"
 					tidy  -eq $i
 
 					if [ "$?" == "2" ];then
-                                                exitStatus="2"
-                                                htmlError=`expr $htmlError + 1`
-                                        fi
-                                done
-                                rm $html
-                                echo "- HTML	($htmlError von $htmlFiles)" >> $err
+						exitStatus="2"
+                        htmlError=`expr $htmlError + 1`
+					fi
+				done
+                rm $html
+                echo "- HTML	($htmlError from $htmlFiles)" >> $err
 
 			else
-				echo "Es existiert keine HTML/XHTML/XML-Datei"
+				echo "There is no HTML / XHTML / XML file"
 			fi
 		;;
-                -css)
+			-css)
 			shift
-                        echo "
+            echo "
 			****************************
 			***     CSS-Validator    ***
 			****************************"
 			find -name *.CSS -or -name *.css > $css
+			grep -vxf $testIgnor $css > $tmp
+			mv $tmp $css
 
 			if [ -s $css ];then
-        	                cssFiles=`wc -l < $css`
-	                        cssError=0
-			
+				cssFiles=`wc -l < $css`
+	            cssError=0
+		
 				for i in `cat $css`; do
-	                                echo "---"
-        	                        echo "$i"
-                	                tidy  -eq $i
+                    echo "---"
+					echo "$i"
+	                tidy  -eq $i
                         	
 				        if [ "$?" == "2" ];then                              
-						exitStatus="2"
-						cssError=`expr $cssError + 1`
-                                	fi
-                        	done
+							exitStatus="2"
+							cssError=`expr $cssError + 1`
+				    	fi
+	        	done
 				rm $css
 				echo "- CCS	($cssError von $cssFiles)" >> $err
 			else
-				echo "Es existiert keine HTML-Datei."
+				echo "There is no CSS file"
 			fi
 		;;
-                -php)
+            -php)
 			shift
-                        echo "
+			echo "
 			****************************
 			***      PHP-Syntax      ***
 			***        checker       ***
 			****************************"
 			find -name *.PHP -or -name *.php > $php
+			grep -vxf $testIgnor $php > $tmp
+			mv $tmp $php
 
 			if [ -s "$php" ];then
-        	                phpFiles=`wc -l < $php`
-	                        phpError=0
+                phpFiles=`wc -l < $php`
+				phpError=0
 
-                        	for i in `cat $php`; do
-                                	echo "---"
-                                	echo "$i"
-                                	php -l $i
+				for i in `cat $php`; do
+					echo "---"
+	            	echo "$i"
+					php -l $i
                                 	
 					if [ "$?" == "2" ];then
-                                	        exitStatus="2"
+            	        exitStatus="2"
 						phpError=`expr $phpError + 1`
-                                        fi
-                                done
-                                rm $php
-                                echo "- PHP	($phpError von $phpFiles)" >> $err
+					fi
+		        done
+				rm $php
+		        echo "- PHP	($phpError von $phpFiles)" >> $err
 			else
-				echo "Es existiert keine PHP-Datei."
+				echo "There is no PHP file"
 			fi
 		;;
                 -js)
 			shift
-                        echo "
+            echo "
 			****************************
 			***       JS-JSHint      ***
 			****************************"
-                        find -name *.JS -or -name *.js > $js
+			find -name *.JS -or -name *.js > $js
+			grep -vxf $testIgnor $js > $tmp
+			mv $tmp $js
 
-                        if [ -s $js ];then
-                        	jsFiles=`wc -l < $js`
-                        	jsError=0
+			if [ -s $js ];then
+				jsFiles=`wc -l < $js`
+				jsError=0
 
-                                for i in `cat $js`; do
-                                        echo "---"
-                                        echo "$i"
-                                        jshint --config /root/scripts/jshint.conf $i
-					#jshint --white $i
-                                        if [ "$?" == "2" ];then
-                                                exitStatus="2"
-                                                jsError=`expr $jsError + 1`
-                                        fi
-                                done
-                                rm $js
-                                echo "- JS	($jsError von $jsFiles)" >> $err
-                        else
-                                echo "Es existiert keine JS-Datei."
-                        fi
+                for i in `cat $js`; do
+					echo "---"
+                    echo "$i"
+                    jshint --config $jsConfig $i
+
+					if [ "$?" == "2" ];then
+						exitStatus="2"
+						jsError=`expr $jsError + 1`
+					fi
+		         done
+				rm $js
+				echo "- JS	($jsError von $jsFiles)" >> $err
+	        else
+				echo "There is no JavaScript file"
+	        fi
 		;;
-                -link)
+			-link)
 			shift
-                        echo "
+            echo "
 			****************************
 			***      Linkchecker     ***
 			****************************"
-                        sudo -u nobody linkchecker  --complete --no-warnings http://$url
-
-			
+			sudo -u nobody linkchecker  --complete --no-warnings http://$cname.$fqdn
 		;;
 		*)
 			shift
 			echo "Usage: $0 {-help|-html|-css|-php|-js|-link}"
-            		exit 1
+			exit 1
         esac
 done
 
