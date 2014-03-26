@@ -1,8 +1,8 @@
-###SourceCodeCeckScript
+#SourceCodeCeckScript
 
 1. This script was created for continuous integration in use with [GitLab-ci](https://github.com/gitlabhq/gitlab-ci) and [GitLab-ci-runner](https://github.com/gitlabhq/gitlab-ci-runner).
 
-#What does the Script:
+###What does the Script:
     * Copy the branch to the /var/www/project-xx/commitID
     * Create automaticaly vHost with subdomain(d37f83hsf.example.com)
     * Check the syntax from the sourcecode
@@ -10,7 +10,7 @@
     * exclude files
     * JSHint config file
 
-#The following source code is supported:
+###The following source code is supported:
     * HTML(XHTML, XML) 
     * CSS
     * PHP
@@ -28,21 +28,21 @@ After you have install the programms you need to download the script. After you 
 3. How you use the Script?
 You go into GitLab-ci, to the project you whant to check, go on Settings and insert on Build steps the path to the script with the options.
 
-##Example
+#####Example
     /root/scripts/SourceCodeCheckScript.sh -js -link
 
-##Script parameters:
+#####Script parameters:
     SourceCodeCheckScript.sh {--help | -html | -css | -php | -js | link}
 
-##Exclude files
+#####Exclude files
     ./ci-test/testignore
 Each line on this file is exclude from the test
 
-##JSHint Setting file
+#####JSHint Setting file
     ./ci-test/jshint.conf
 In this file are the settings for the JSHint program which is used for the Tests.
 
-##Informations:
+#####Informations:
 Actual the script only work with Ubuntu perfectly.
 
 ---
