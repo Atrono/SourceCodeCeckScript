@@ -1,6 +1,6 @@
 #SourceCodeCeckScript
 
-1. This script was created for continuous integration in use with [GitLab-ci](https://github.com/gitlabhq/gitlab-ci) and [GitLab-ci-runner](https://github.com/gitlabhq/gitlab-ci-runner).
+This script was created for continuous integration in use with [GitLab-ci](https://github.com/gitlabhq/gitlab-ci) and [GitLab-ci-runner](https://github.com/gitlabhq/gitlab-ci-runner).
 
 ###What does the Script:
     * Copy the branch to the /var/www/project-xx/commitID
@@ -16,7 +16,7 @@
     * PHP
     * JavaScript
 
-2. How to Install the Script?
+###How to Install the Script?
 First you install on GitLab-ci-runner the following programs which requires the script:
     * tidy (for html and css)
     * php5
@@ -25,7 +25,7 @@ First you install on GitLab-ci-runner the following programs which requires the 
     * apache2 
 After you have install the programms you need to download the script. After you have download it, give it executable rights.
 
-3. How you use the Script?
+###How you use the Script?
 You go into GitLab-ci, to the project you whant to check, go on Settings and insert on Build steps the path to the script with the options.
 
 #####Example
