@@ -3,26 +3,26 @@
 This script was created for continuous integration in use with [GitLab-ci](https://github.com/gitlabhq/gitlab-ci) and [GitLab-ci-runner](https://github.com/gitlabhq/gitlab-ci-runner).
 
 ###What does the Script:
-    * Copy the branch to the /var/www/project-xx/commitID
-    * Create automaticaly vHost with subdomain(d37f83hsf.example.com)
-    * Check the syntax from the sourcecode
-    * Check the link's with a linkchecker from the subdomain
-    * exclude files
-    * JSHint config file
+* Copy the branch to the /var/www/project-xx/commitID
+* Create automaticaly vHost with subdomain(d37f83hsf.example.com)
+* Check the syntax from the sourcecode
+* Check the link's with a linkchecker from the subdomain
+* exclude files
+* JSHint config file
 
 ###The following source code is supported:
-    * HTML(XHTML, XML) 
-    * CSS
-    * PHP
-    * JavaScript
+* HTML(XHTML, XML) 
+* CSS
+* PHP
+* JavaScript
 
 ###How to Install the Script?
 First you install on GitLab-ci-runner the following programs which requires the script:
-    * tidy (for html and css)
-    * php5
-    * JSHint
-    * Linkchecker
-    * apache2 
+* tidy (for html and css)
+* php5
+* JSHint
+* Linkchecker
+* apache2 
 After you have install the programms you need to download the script. After you have download it, give it executable rights.
 
 ###How you use the Script?
