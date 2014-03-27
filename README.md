@@ -3,7 +3,7 @@
 This script was created for continuous integration in use with [GitLab-ci](https://github.com/gitlabhq/gitlab-ci) and [GitLab-ci-runner](https://github.com/gitlabhq/gitlab-ci-runner).
 
 ###What does the Script:
-* Copy the branch to the /var/www/project-xx/commitID
+* Copies the commit to the following path  /var/www/project-xx/commitID
 * Create automaticaly vHost with subdomain(d37f83hsf.example.com)
 * Check the syntax from the sourcecode
 * Check the link's with a linkchecker from the subdomain
