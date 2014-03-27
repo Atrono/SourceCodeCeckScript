@@ -4,7 +4,7 @@ This script was created for continuous integration in use with [GitLab-ci](https
 
 ###What does the Script:
 * Copies the commit to the following path  /var/www/project-xx/commitID
-* Create automaticaly vHost with subdomain(d37f83hsf.example.com)
+* Create automaticaly vHost with subdomain(checksum.example.com)
 * Check the syntax from the sourcecode
 * Check the link's with a linkchecker from the subdomain
 * exclude files
